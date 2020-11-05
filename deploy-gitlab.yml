@@ -1,0 +1,29 @@
+---
+- hosts: localhost
+  gather_facts: True
+  environment:
+    PATH: "{{ playbook_dir }}/bin:{{ ansible_env.PATH }}"
+  tasks:
+    - name: Run all the common tasks
+      import_role:
+        name: common
+
+- hosts: localhost
+  gather_facts: False
+  environment:
+    PATH: "{{ playbook_dir }}/bin:{{ ansible_env.PATH }}"
+    GOVC_USERNAME: "{{ vcenter.admin_username }}"
+    GOVC_PASSWORD: "{{ vcenter.admin_password }}"
+    GOVC_URL: "https://{{ vcenter.ip }}"
+    GOVC_DATACENTER: "{{ datacenter }}"
+    GOVC_INSECURE: 1
+  tasks:
+
+    - name: Run the deploy_ova to deploy the RHCOS OVA
+      import_role:
+        name: deploy_ova
+      when: skip_ova is not defined
+
+    - name: Run the gitlab role to deploy the GitLab server
+      import_role:
+        name: gitlab

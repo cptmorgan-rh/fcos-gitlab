@@ -1,0 +1,26 @@
+config:
+  installer_ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+vcenter:
+  ip: vcenter.example.com
+  datastore: ds0
+  network: 10.0.0.x-24
+  admin_username: administrator@vsphere.local
+  admin_password: Password1!
+  datacenter: LAB
+  folder_absolute_path: /LAB/vm/
+  vm_power_state: poweredon
+  template_name: FCOS32.20201018
+download:
+  fcos_ova: https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/32.20201018.3.0/x86_64/fedora-coreos-32.20201018.3.0-vmware.x86_64.ova
+  govc: https://github.com/vmware/govmomi/releases/download/v0.23.0/govc_linux_amd64.gz
+gitlab_vm:
+  name: gitlab
+  ipaddr: 10.0.0.100
+  gateway: 10.0.0.1
+  netmask: 255.255.255.0
+  dns: 10.0.0.1
+  network_interface_name: ens192
+  tag: latest
+  ssh_port: 2222
+  num_cpus: 4
+  memory_mb: 8192

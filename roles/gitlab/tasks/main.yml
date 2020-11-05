@@ -1,0 +1,67 @@
+---
+
+- name: Delete gitlab vm if redeploy defined
+  command: "govc vm.destroy {{ gitlab_vm.name }}" # noqa 301
+  when: redeploy is defined
+
+- name: Create Temp Build Directory for gitlab
+  tempfile:
+    state: directory
+    suffix: gitlab
+  register: gitlab_tempdir
+
+- name: Create gitlab.ign in "{{ gitlab_tempdir.path }}"/
+  template:
+    src: templates/gitlab.ign.j2
+    dest: "{{ gitlab_tempdir.path }}/gitlab.ign"
+    mode: 0664
+
+- name: Set gitlab_ign Fact
+  set_fact:
+    gitlab_ign: "{{ lookup('file', '{{ gitlab_tempdir.path }}/gitlab.ign') | b64encode }}" # noqa 207
+
+- name: Create gitlab.merged.ign in "{{ gitlab_tempdir.path }}"/
+  template:
+    src: templates/gitlab.merged.ign.j2
+    dest: "{{ gitlab_tempdir.path }}/gitlab.merged.ign"
+    mode: 0664
+
+- name: Set gitlab_merged_ign Fact
+  set_fact:
+    gitlab_merged_ign: "{{ lookup('file', '{{ gitlab_tempdir.path }}/gitlab.merged.ign') | b64encode }}" # noqa 207
+
+- name: Create gitlab VMs from the template
+  vmware_guest:
+    hostname: "{{ vcenter.ip }}"
+    username: "{{ vcenter.admin_username }}"
+    password: "{{ vcenter.admin_password }}"
+    datacenter: "{{ vcenter.datacenter }}"
+    validate_certs: no
+    folder: "{{ vcenter.folder_absolute_path }}"
+    name: "{{ gitlab_vm.name }}"
+    state: "{{ vcenter.vm_power_state }}"
+    template: "{{ vcenter.template_name }}"
+    disk:
+    - size_gb: 16
+      type: thin
+      datastore: "{{ vcenter.datastore }}"
+    hardware:
+      memory_mb: "{{ gitlab_vm.memory_mb }}"
+      num_cpus: "{{ gitlab_vm.num_cpus }}"
+      memory_reservation_lock: True
+    networks:
+    - name: "{{ vcenter.network }}"
+    wait_for_ip_address: no
+    customvalues:
+     - key: guestinfo.ignition.config.data
+       value: "{{ gitlab_merged_ign }}"
+     - key: guestinfo.ignition.config.data.encoding
+       value: base64
+     - key: guestinfo.afterburn.initrd.network-kargs
+       value: "ip={{ gitlab_vm.ipaddr }}::{{ gitlab_vm.gateway }}:{{ gitlab_vm.netmask }}:{{ gitlab_vm.name }}:ens192:off:{{ gitlab_vm.dns }}" # noqa 204
+
+- name: Remove {{ gitlab_tempdir.path }} and contents
+  file:
+    path: "{{ gitlab_tempdir.path }}"
+    state: absent
+  when: gitlab_tempdir.path is defined

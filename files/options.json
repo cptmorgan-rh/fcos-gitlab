@@ -1,0 +1,7 @@
+{
+    "DiskProvisioning": "thin",
+    "MarkAsTemplate": true,
+    "PowerOn": false,
+    "WaitForIP": false,
+    "Name": null
+}

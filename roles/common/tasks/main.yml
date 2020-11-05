@@ -1,0 +1,61 @@
+    - name: Set the datacenter variable
+      set_fact:
+        datacenter: "{{ vcenter.datacenter }}"
+
+    - name: Install the necessary linux packages which will be needed later in the ansible run
+      package:
+        name:
+          - jq
+      become: true
+
+    - name: Display Ansible's Python version
+      debug:
+        var: ansible_python_version
+        verbosity: 1
+
+    - name: Install python-pip or python2-pip if Ansible uses Python 2
+      package:
+        name:
+          - "python2-pip"
+      when: ansible_python_version is match("2.*")
+      become: true
+
+    - name: Install python3-pip if Ansible uses Python 3
+      package:
+        name:
+          - python3-pip
+      when: ansible_python_version is match("3.*")
+      become: true
+
+    - name: Install pyvmomi
+      pip:
+        name: pyvmomi
+      become: true
+
+    - name: Clean up existing bin, install-dir and downloads folders
+      file:
+        path: "{{ playbook_dir }}/{{ item }}"
+        state: absent
+      with_items: ["bin", "downloads"]
+      when: clean is defined
+
+    - name: Create bin, install-dir and downloads folders
+      file:
+        path: "{{ playbook_dir }}/{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items: ["bin", "downloads"]
+
+    - name: Download govc
+      get_url:
+        url: "{{ download.govc }}"
+        dest: "{{ playbook_dir }}/downloads/govc.gz"
+        validate_certs: no
+
+    - name: Unarchive govc
+      shell: gzip -dc "{{ playbook_dir }}/downloads/govc.gz" > "{{ playbook_dir }}/bin/govc" # noqa 301
+
+    - name: Make govc executable
+      file:
+        path: "{{ playbook_dir }}/bin/govc"
+        mode: '775'
