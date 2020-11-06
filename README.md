@@ -17,11 +17,10 @@ Start by editing the `group_vars/all.yml` file:
     4. Datacenter name
     5. username and passwords of vCenter Account
     6. Absoluate folder path - e.g /DataCenter/vm/Folder/
-    7. Template Name
-    8. VM Power state after being deployed
+    7. VM Power state after being deployed
 
-+ Configure your Fedora CoreOS URL and govc version.
-    1. To get the URL for VMware ova of the latest stable release of visit this link: [Download Fedora CoreOS](https://getfedora.org/en/coreos/download?tab=metal_virtualized&stream=stable)
++ Configure your Fedora CoreOS Stream (stable, testing, or next) and govc version.
+    1. To get the URL for latest govc release visit this link: [govc Releases](https://github.com/vmware/govmomi/releases)
 
 + Configure your GitLab VM Settings
     1. VM and Host Name

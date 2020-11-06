@@ -9,9 +9,8 @@ vcenter:
   datacenter: LAB
   folder_absolute_path: /LAB/vm/
   vm_power_state: poweredon
-  template_name: FCOS32.20201018
 download:
-  fcos_ova: https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/32.20201018.3.0/x86_64/fedora-coreos-32.20201018.3.0-vmware.x86_64.ova
+  fcos_stream: stable
   govc: https://github.com/vmware/govmomi/releases/download/v0.23.0/govc_linux_amd64.gz
 gitlab_vm:
   name: gitlab

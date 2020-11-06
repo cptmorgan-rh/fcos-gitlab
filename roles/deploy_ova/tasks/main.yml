@@ -1,21 +1,38 @@
+  - name: Set fcos_url fact
+    set_fact:
+      fcos_url: "https://builds.coreos.fedoraproject.org/streams/{{ download.fcos_stream }}.json"
+
+  - name: Fetch {{ fcos_stream }} stream
+    uri:
+      url: "{{ fcos_url }}"
+    register: fcos_json
+
+  - name: Set template_name name
+    set_fact:
+      template_name: "{{ fcos_json.json | json_query('architectures.x86_64.artifacts.vmware.release') }}"
+
+  - name: Set template_name name
+    set_fact:
+      fcos_ova: "{{ fcos_json.json | json_query('architectures.x86_64.artifacts.vmware.formats.ova.disk.location') }}"
+
   - name: Check if the FCOS template already exists
-    shell: "govc find -type m | grep {{ vcenter.template_name }}" # noqa 301
+    shell: "govc find -type m | grep {{ template_name }}" # noqa 301
     register: template_exists
     ignore_errors: yes
 
   - name: Delete FCOS template if skip_ova=false
-    command: "govc vm.destroy {{ vcenter.template_name }}" # noqa 301
+    command: "govc vm.destroy {{ template_name }}" # noqa 301
     when:
       - skip_ova is not defined
       - template_exists.rc == 0
 
   - name: Download the ova file
     get_url:
-      url: "{{ download.fcos_ova }}"
-      dest: "{{ playbook_dir }}/downloads/{{ vcenter.template_name }}.ova"
+      url: "{{ fcos_ova }}"
+      dest: "{{ playbook_dir }}/downloads/{{ template_name }}.ova"
       validate_certs: no
     when: skip_ova is not defined
 
   - name: Deploy the OVA template into vCenter
-    shell: "govc import.ova --name={{ vcenter.template_name }} --ds={{ vcenter.datastore }} --options={{ playbook_dir }}/files/options.json {{ playbook_dir }}/downloads/{{ vcenter.template_name }}.ova"  # noqa 301
+    shell: "govc import.ova --name={{ template_name }} --ds={{ vcenter.datastore }} --options={{ playbook_dir }}/files/options.json {{ playbook_dir }}/downloads/{{ template_name }}.ova"  # noqa 301
     when: skip_ova is not defined
