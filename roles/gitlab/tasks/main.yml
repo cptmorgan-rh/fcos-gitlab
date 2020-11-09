@@ -20,16 +20,6 @@
   set_fact:
     gitlab_ign: "{{ lookup('file', '{{ gitlab_tempdir.path }}/gitlab.ign') | b64encode }}" # noqa 207
 
-- name: Create gitlab.merged.ign in "{{ gitlab_tempdir.path }}"/
-  template:
-    src: templates/gitlab.merged.ign.j2
-    dest: "{{ gitlab_tempdir.path }}/gitlab.merged.ign"
-    mode: 0664
-
-- name: Set gitlab_merged_ign Fact
-  set_fact:
-    gitlab_merged_ign: "{{ lookup('file', '{{ gitlab_tempdir.path }}/gitlab.merged.ign') | b64encode }}" # noqa 207
-
 - name: Create gitlab VMs from the template
   vmware_guest:
     hostname: "{{ vcenter.ip }}"
@@ -40,9 +30,9 @@
     folder: "{{ vcenter.folder_absolute_path }}"
     name: "{{ gitlab_vm.name }}"
     state: "{{ vcenter.vm_power_state }}"
-    template: "{{ vcenter.template_name }}"
+    template: "FCOS-{{ template_name }}"
     disk:
-    - size_gb: 16
+    - size_gb: "{{ gitlab_vm.disk_gb }}"
       type: thin
       datastore: "{{ vcenter.datastore }}"
     hardware:
@@ -54,7 +44,7 @@
     wait_for_ip_address: no
     customvalues:
      - key: guestinfo.ignition.config.data
-       value: "{{ gitlab_merged_ign }}"
+       value: "{{ gitlab_ign }}"
      - key: guestinfo.ignition.config.data.encoding
        value: base64
      - key: guestinfo.afterburn.initrd.network-kargs

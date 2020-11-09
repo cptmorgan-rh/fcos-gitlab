@@ -23,3 +23,5 @@ gitlab_vm:
   ssh_port: 2222
   num_cpus: 4
   memory_mb: 8192
+  disk_gb: 16
+  domain_name: exmaple.com
