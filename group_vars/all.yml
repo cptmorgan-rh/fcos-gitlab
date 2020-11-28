@@ -12,6 +12,7 @@ vcenter:
 download:
   fcos_stream: stable
   govc: https://github.com/vmware/govmomi/releases/download/v0.23.0/govc_linux_amd64.gz
+  fcct: https://github.com/coreos/fcct/releases/download/v0.7.0/fcct-x86_64-unknown-linux-gnu
 gitlab_vm:
   name: gitlab
   ipaddr: 10.0.0.100
@@ -24,4 +25,4 @@ gitlab_vm:
   num_cpus: 4
   memory_mb: 8192
   disk_gb: 16
-  domain_name: exmaple.com
+  domain_name: example.com

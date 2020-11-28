@@ -10,15 +10,18 @@
     suffix: gitlab
   register: gitlab_tempdir
 
-- name: Create gitlab.ign in "{{ gitlab_tempdir.path }}"/
+- name: Create gitlab.fcc in "{{ gitlab_tempdir.path }}"
   template:
-    src: templates/gitlab.ign.j2
-    dest: "{{ gitlab_tempdir.path }}/gitlab.ign"
+    src: gitlab.fcc.j2
+    dest: "{{ gitlab_tempdir.path }}/gitlab.fcc"
     mode: 0664
+
+- name: Create GitLab transpiled ignition file
+  shell: "{{ playbook_dir }}/bin/fcct -d {{ gitlab_tempdir.path }} --pretty --strict < {{ gitlab_tempdir.path }}/gitlab.fcc > {{ gitlab_tempdir.path }}/transpiled_config.ign" # noqa 301
 
 - name: Set gitlab_ign Fact
   set_fact:
-    gitlab_ign: "{{ lookup('file', '{{ gitlab_tempdir.path }}/gitlab.ign') | b64encode }}" # noqa 207
+    gitlab_ign: "{{ lookup('file', '{{ gitlab_tempdir.path }}/transpiled_config.ign') | b64encode }}" # noqa 207
 
 - name: Create gitlab VMs from the template
   vmware_guest:

@@ -1,0 +1,41 @@
+variant: fcos
+version: 1.1.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - {{ config.installer_ssh_key }}
+storage:
+  directories:
+  - path: /srv/gitlab
+  - path: /srv/gitlab/data
+  - path: /srv/gitlab/logs
+  - path: /srv/gitlab/config
+systemd:
+  units:
+    - name: gitlab.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=gitlab
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/bin/podman kill gitlab
+        ExecStartPre=-/bin/podman rm gitlab
+        ExecStartPre=/bin/podman pull gitlab/gitlab-ce:{{ gitlab_vm.tag }}
+        ExecStart=/bin/podman run \
+          --privileged \
+          --hostname {{ gitlab_vm.name }}.{{ gitlab_vm.domain_name }} \
+          --publish 443:443 \
+          --publish 80:80 \
+          --publish {{ gitlab_vm.ssh_port }}:22 \
+          --name gitlab \
+          --restart always \
+          --volume /srv/gitlab/config:/etc/gitlab \
+          --volume /srv/gitlab/logs:/var/log/gitlab \
+          --volume /srv/gitlab/data:/var/opt/gitlab \
+          gitlab/gitlab-ce:{{ gitlab_vm.tag }}
+        [Install]
+        WantedBy=multi-user.target
