@@ -10,7 +10,7 @@ The goal of this repository is to provide a simple, reproducible way to deploy a
 
 Start by editing the `group_vars/all.yml` file:
 
-+ Set the vcenter variables
++ Set the vCenter variables
     1. IP/Host Name of vCenter
     2. vCenter Network
     3. Datastore name
@@ -19,8 +19,8 @@ Start by editing the `group_vars/all.yml` file:
     6. Absoluate folder path - e.g /DataCenter/vm/Folder/
     7. VM Power state after being deployed
 
-+ Configure your Fedora CoreOS Stream (stable, testing, or next) and govc version.
-    1. To get the URL for latest govc release visit this link: [govc Releases](https://github.com/vmware/govmomi/releases)
++ Configure your Fedora CoreOS URL and govc version.
+    1. Set the Fedora CoreOS stream version. `stable` is the default
 
 + Configure your GitLab VM Settings
     1. VM and Host Name
