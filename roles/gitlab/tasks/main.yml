@@ -10,7 +10,7 @@
     suffix: gitlab
   register: gitlab_tempdir
 
-- name: "Create gitlab.fcc in {{ gitlab_tempdir.path }}"
+- name: Create gitlab.fcc in "{{ gitlab_tempdir.path }}"
   template:
     src: gitlab.fcc.j2
     dest: "{{ gitlab_tempdir.path }}/gitlab.fcc"
@@ -53,7 +53,7 @@
      - key: guestinfo.afterburn.initrd.network-kargs
        value: "ip={{ gitlab_vm.ipaddr }}::{{ gitlab_vm.gateway }}:{{ gitlab_vm.netmask }}:{{ gitlab_vm.name }}:ens192:off:{{ gitlab_vm.dns }}" # noqa 204
 
-- name: "Remove {{ gitlab_tempdir.path }} and contents"
+- name: Remove {{ gitlab_tempdir.path }} and contents
   file:
     path: "{{ gitlab_tempdir.path }}"
     state: absent

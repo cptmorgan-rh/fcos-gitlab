@@ -13,8 +13,26 @@ storage:
   - path: /srv/gitlab/config
 systemd:
   units:
-    - name: gitlab.service
+    - name: install-open-vm-tools.service
       enabled: true
+      contents: |
+        [Unit]
+        Description=Installs open-vm-tools
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        TimeoutStartSec=0
+        ExecStart=/bin/bash -c "/bin/rpm-ostree install open-vm-tools"
+        ExecStartPost=/usr/bin/systemctl enable gitlab.service
+        ExecStartPost=/bin/bash -c "/usr/bin/systemctl disable install-open-vm-tools.service && reboot"
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: gitlab.service
+      enabled: false
       contents: |
         [Unit]
         Description=gitlab
@@ -24,7 +42,7 @@ systemd:
         TimeoutStartSec=0
         ExecStartPre=-/bin/podman kill gitlab
         ExecStartPre=-/bin/podman rm gitlab
-        ExecStartPre=/bin/podman pull gitlab/gitlab-ce:{{ gitlab_vm.tag }}
+        ExecStartPre=/bin/podman pull docker.io/gitlab/gitlab-ce:{{ gitlab_vm.tag }}
         ExecStart=/bin/podman run \
           --privileged \
           --hostname {{ gitlab_vm.name }}.{{ gitlab_vm.domain_name }} \
