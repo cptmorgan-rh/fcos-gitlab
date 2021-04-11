@@ -6,6 +6,14 @@ passwd:
       ssh_authorized_keys:
         - {{ config.installer_ssh_key }}
 storage:
+  files:
+    - path: /etc/sysctl.d/20-silence-audit.conf
+      contents:
+        inline: |
+          # Raise console message logging level from DEBUG (7) to WARNING (4)
+          # so that audit messages don't get interspersed on the console that
+          # may frustrate a user trying to interactively log in.
+          kernel.printk=4
   directories:
   - path: /srv/gitlab
   - path: /srv/gitlab/data
